@@ -1,0 +1,170 @@
+[
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_month_info",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)\n        response.raise_for_status()\n        data = response.json()\n        dates = data.get(\"dates\", {})\n        start_date = dates.get(\"startDate\")\n        end_date = dates.get(\"endDate\")\n        # Extract month from start_date (format: YYYY-MM-DD)",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "get_month_name",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def get_month_name(year_month):\n    \"\"\"Convert YYYY-MM to month name\"\"\"\n    month_names = {\n        1: \"January\", 2: \"February\", 3: \"March\", 4: \"April\",\n        5: \"May\", 6: \"June\", 7: \"July\", 8: \"August\",\n        9: \"September\", 10: \"October\", 11: \"November\", 12: \"December\"\n    }\n    try:\n        month_num = int(year_month.split(\"-\")[1])\n        return month_names.get(month_num, year_month)",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "get_next_month_utc9",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def get_next_month_utc9():\n    \"\"\"Get next month based on UTC+9 time\"\"\"\n    now_utc9 = datetime.now(UTC_PLUS_9)\n    # Calculate next month\n    if now_utc9.month == 12:\n        next_month = 1\n        next_year = now_utc9.year + 1\n    else:\n        next_month = now_utc9.month + 1\n        next_year = now_utc9.year",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "send_notification",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def send_notification(current_month, start_date, end_date):\n    \"\"\"Send notification via Telegram when month changes\"\"\"\n    current_month_name = get_month_name(current_month)\n    next_month_key, next_month_name = get_next_month_utc9()\n    current_time = datetime.now(UTC_PLUS_9).strftime('%Y-%m-%d %H:%M:%S')\n    message = (\n        f\"🎉 NEW APPOINTMENT MONTH AVAILABLE!\\n\\n\"\n        f\"📅 Current Month: {current_month_name} {current_month[:4]}\\n\"\n        f\"   ({current_month})\\n\\n\"\n        f\"📆 Date Range:\\n\"",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "load_last_state",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def load_last_state():\n    \"\"\"Load last known state from file\"\"\"\n    if os.path.exists(STATE_FILE):\n        try:\n            with open(STATE_FILE, 'r') as f:\n                return json.load(f)\n        except:\n            return None\n    return None\ndef save_state(current_month, start_date, end_date):",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "save_state",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def save_state(current_month, start_date, end_date):\n    \"\"\"Save current state to file\"\"\"\n    state = {\n        \"current_month\": current_month,\n        \"start_date\": start_date,\n        \"end_date\": end_date,\n        \"last_check\": datetime.now(UTC_PLUS_9).isoformat()\n    }\n    with open(STATE_FILE, 'w') as f:\n        json.dump(state, f, indent=2)",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "def main():\n    current_time = datetime.now(UTC_PLUS_9).strftime('%Y-%m-%d %H:%M:%S')\n    print(\"🔍 Checking appointment calendar...\")\n    print(f\"Current time (UTC+9): {current_time}\")\n    # Check environment variables\n    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:\n        print(\"❌ Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set\")\n        sys.exit(1)\n    # Get current month info from API\n    current_month, start_date, end_date = get_current_month_info()",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "API_URL",
+        "kind": 5,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "API_URL = \"https://api.ajendamentu.mj.gov.tl/api/vizitor/appointments/calender/3/6/2026/3/\"\nTELEGRAM_BOT_TOKEN = os.environ.get(\"TELEGRAM_BOT_TOKEN\")\nTELEGRAM_CHAT_ID = os.environ.get(\"TELEGRAM_CHAT_ID\")\nSTATE_FILE = \".last_state\"\n# UTC+9 timezone\nUTC_PLUS_9 = timezone(timedelta(hours=9))\ndef get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "TELEGRAM_BOT_TOKEN",
+        "kind": 5,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "TELEGRAM_BOT_TOKEN = os.environ.get(\"TELEGRAM_BOT_TOKEN\")\nTELEGRAM_CHAT_ID = os.environ.get(\"TELEGRAM_CHAT_ID\")\nSTATE_FILE = \".last_state\"\n# UTC+9 timezone\nUTC_PLUS_9 = timezone(timedelta(hours=9))\ndef get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)\n        response.raise_for_status()",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "TELEGRAM_CHAT_ID",
+        "kind": 5,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "TELEGRAM_CHAT_ID = os.environ.get(\"TELEGRAM_CHAT_ID\")\nSTATE_FILE = \".last_state\"\n# UTC+9 timezone\nUTC_PLUS_9 = timezone(timedelta(hours=9))\ndef get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)\n        response.raise_for_status()\n        data = response.json()",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "STATE_FILE",
+        "kind": 5,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "STATE_FILE = \".last_state\"\n# UTC+9 timezone\nUTC_PLUS_9 = timezone(timedelta(hours=9))\ndef get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)\n        response.raise_for_status()\n        data = response.json()\n        dates = data.get(\"dates\", {})",
+        "detail": "check_appointment",
+        "documentation": {}
+    },
+    {
+        "label": "UTC_PLUS_9",
+        "kind": 5,
+        "importPath": "check_appointment",
+        "description": "check_appointment",
+        "peekOfCode": "UTC_PLUS_9 = timezone(timedelta(hours=9))\ndef get_current_month_info():\n    \"\"\"Fetch API and return current month info\"\"\"\n    try:\n        response = requests.get(API_URL, timeout=30)\n        response.raise_for_status()\n        data = response.json()\n        dates = data.get(\"dates\", {})\n        start_date = dates.get(\"startDate\")\n        end_date = dates.get(\"endDate\")",
+        "detail": "check_appointment",
+        "documentation": {}
+    }
+]
