@@ -10,8 +10,24 @@ import os
 import sys
 from datetime import datetime, timezone, timedelta
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 API_URL = "https://api.ajendamentu.mj.gov.tl/api/vizitor/appointments/calender/3/6/2026/3/"
+
+def get_session():
+    """Create a requests session with retry logic"""
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"]
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 STATE_FILE = ".last_state"
@@ -21,8 +37,9 @@ UTC_PLUS_9 = timezone(timedelta(hours=9))
 
 def get_current_month_info():
     """Fetch API and return current month info"""
+    session = get_session()
     try:
-        response = requests.get(API_URL, timeout=30)
+        response = session.get(API_URL, timeout=60)
         response.raise_for_status()
         data = response.json()
         
